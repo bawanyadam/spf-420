@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Should I Wear SPF?</title>
+        <meta
+            name="description"
+            content="A tiny, maximalist web app that checks your local UV index and says if you should wear SPF."
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <main id="app" class="app is-loading">
+            <section class="block block-primary">
+                <div class="burst" aria-hidden="true"></div>
+                <div class="poster">
+                    <div class="card-stack">
+                        <div class="card">
+                            <div class="headline" id="headline">Loading…</div>
+                            <div class="subhead" id="subhead">
+                                Grabbing your sky vibes.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="block block-secondary">
+                <div class="meta">
+                    <div class="meta-row">
+                        <span class="label">UV now</span>
+                        <span class="value" id="uv-now">—</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="label">UV max today</span>
+                        <span class="value" id="uv-max">—</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="label">Location</span>
+                        <span class="value" id="location">—</span>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button id="retry" class="btn" hidden>
+                        Retry Geolocation
+                    </button>
+
+                    <div class="manual" id="manual">
+                        <label for="city">No location? Type a city:</label>
+                        <div class="manual-row">
+                            <input
+                                id="city"
+                                type="text"
+                                placeholder="e.g. Tokyo, JP"
+                            />
+                            <button id="lookup" class="btn">Check UV</button>
+                        </div>
+                        <div class="hint">Uses Open‑Meteo geocoding.</div>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="block block-tertiary">
+                <p class="disclaimer">Built by Adam Goehrig‑Bawany</p>
+            </footer>
+        </main>
+
+        <script src="script.js" defer></script>
+    </body>
+</html>

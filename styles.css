@@ -1,0 +1,264 @@
+/*
+  shouldiwearspf — maximalist, colorful, blocky vibes
+  System fonts to avoid external dependencies; bold sizes and high contrast.
+*/
+
+:root {
+    /* base */
+    --fg-dark: #0b0b0b;
+    --fg-light: #ffffff;
+    --paper: #ffffff;
+    --ink: #000000; /* all text black */
+
+    /* accents (flat) — currently unused but kept */
+    --accent-1: #e60023;
+    --accent-2: #00c2ff;
+    --accent-3: #b7ff00;
+
+    /* page colors */
+    --bg: #dfff00; /* all backgrounds */
+    --hero-bg: transparent;
+    --hero-fg: #000000;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family:
+        "Space Grotesk",
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        Segoe UI,
+        Roboto,
+        Helvetica,
+        Arial,
+        Noto Sans,
+        "Apple Color Emoji",
+        "Segoe UI Emoji";
+    font-optical-sizing: auto;
+    color: var(--ink);
+    background: var(--bg);
+    text-transform: lowercase;
+}
+
+.app {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: 1fr auto auto;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    padding: clamp(12px, 2vw, 24px);
+}
+
+.block {
+    padding: clamp(16px, 3vw, 40px);
+}
+
+.block-primary {
+    position: relative;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    text-align: left;
+    gap: 16px;
+    min-height: 50vh;
+    background: transparent;
+    color: var(--ink);
+    overflow: hidden;
+}
+
+/* Rotating burst backdrop */
+.burst {
+    display: none;
+}
+
+/* Poster stack */
+.poster {
+    display: grid;
+    place-items: center;
+    z-index: 1;
+}
+.card-stack {
+    position: relative;
+}
+.card-stack::before,
+.card-stack::after {
+    display: none;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: clamp(240px, 75vmin, 980px);
+    aspect-ratio: 1 / 1;
+    padding: clamp(16px, 6vmin, 36px);
+    background: var(--hero-bg);
+    color: var(--hero-fg);
+    border: 10px solid #000;
+    border-radius: 50%;
+    box-shadow: none;
+}
+
+.headline {
+    font-weight: 1000;
+    letter-spacing: -0.02em;
+    line-height: 0.9;
+    font-size: clamp(25px, 30vw, 140px);
+    text-transform: inherit;
+    color: var(--hero-fg);
+}
+
+.subhead {
+    font-size: clamp(35px, 25vw, 35px);
+    opacity: 0.9;
+    color: var(--hero-fg);
+}
+
+.block-secondary {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    background: transparent; /* let the state color show through */
+    color: var(--ink);
+}
+
+.meta {
+    display: grid;
+    gap: 10px;
+}
+
+.meta-row {
+    display: flex;
+    justify-content: space-between;
+    border: 2px solid #000;
+    padding: 14px 16px;
+    font-weight: 900;
+    background: transparent;
+    color: #000;
+    border-radius: 50px;
+}
+
+.meta-row .label {
+    background: transparent;
+    color: #000;
+    padding: 4px 8px;
+}
+
+.meta-row .value {
+    background: transparent;
+    color: #000;
+    padding: 4px 8px;
+}
+
+.actions {
+    display: grid;
+    gap: 12px;
+}
+
+.btn {
+    appearance: none;
+    border: 2px solid #000;
+    background: #000;
+    color: #dfff00;
+    font-weight: 900;
+    text-transform: inherit;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-radius: 50px;
+}
+
+.btn:hover {
+    filter: saturate(120%) brightness(1.05);
+}
+.btn:active {
+    transform: translateY(1px);
+}
+
+.manual {
+    display: grid;
+    gap: 8px;
+}
+.manual-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+}
+
+input#city {
+    border: 2px solid #000;
+    padding: 10px 12px;
+    font-weight: 700;
+    font-size: 16px;
+    background: transparent;
+    color: #000;
+    border-radius: 50px;
+}
+input#city::placeholder {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.hint {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.block-tertiary {
+    background: transparent;
+    color: #000;
+}
+
+.disclaimer {
+    margin: 0;
+    opacity: 0.85;
+    font-size: 12px;
+}
+.disclaimer a {
+    color: var(--accent-2);
+}
+
+/* State-driven color pops */
+/* lock all states to the same palette for now */
+.app.state-yes {
+    --bg: #dfff00;
+    --hero-bg: transparent;
+    --hero-fg: #000000;
+}
+.app.state-maybe {
+    --bg: #dfff00;
+    --hero-bg: transparent;
+    --hero-fg: #000000;
+}
+.app.state-no {
+    --bg: #dfff00;
+    --hero-bg: transparent;
+    --hero-fg: #000000;
+}
+
+.is-loading .headline {
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.5;
+    }
+}
