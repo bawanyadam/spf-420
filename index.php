@@ -72,7 +72,7 @@ $scriptVersion = file_exists("script.js") ? filemtime("script.js") : time();
                             />
                             <button id="lookup" class="btn">Check UV</button>
                         </div>
-                        <div class="hint">Uses Open‑Meteo geocoding.</div>
+                        <div class="hint">Uses Open‑Meteo geocoding</div>
                     </div>
                 </div>
             </section>
