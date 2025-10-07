@@ -280,8 +280,8 @@
     els.retry.hidden = false;
     els.manual.style.display = "grid";
     setHeadline(
-      "We need a dot on Earth.",
-      reason || "Location permission denied — type a city below.",
+      "We need a dot on Earth",
+      reason || "Location permission denied — type a city below",
     );
   }
 
