@@ -137,7 +137,7 @@
       };
     return {
       state: "state-no",
-      title: "no",
+      title: "not\nright\nnow",
       sub: "UV is minimal at the moment",
     };
   }
