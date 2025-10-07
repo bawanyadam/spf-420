@@ -102,7 +102,7 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    width: clamp(240px, 75vmin, 980px);
+    width: min(clamp(240px, 75vmin, 980px), 90vw);
     aspect-ratio: 1 / 1;
     padding: clamp(16px, 6vmin, 36px);
     background: var(--hero-bg);
@@ -116,9 +116,10 @@ body {
     font-weight: 1000;
     letter-spacing: -0.02em;
     line-height: 0.9;
-    font-size: clamp(25px, 30vw, 140px);
+    font-size: clamp(28px, min(22vw, 18vh), 140px);
     text-transform: inherit;
     color: var(--hero-fg);
+    max-width: 90%;
 }
 
 .subhead {
