@@ -48,7 +48,7 @@
     if (uvNow >= 1)
       return {
         state: "state-maybe",
-        title: "probably\nno",
+        title: "probably\nnot",
         sub: "UV is low, but sun care never hurts.",
       };
     return {
