@@ -102,32 +102,30 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    width: min(clamp(240px, 75vmin, 980px), 90vw);
-    aspect-ratio: 1 / 1;
-    padding: clamp(16px, 6vmin, 36px);
+    width: min(90vw, 720px);
+    padding: clamp(24px, 6vmin, 52px);
     background: var(--hero-bg);
     color: var(--hero-fg);
-    border: 8px solid #000;
-    border-radius: 50%;
-    box-shadow: none;
+    gap: clamp(12px, 3vmin, 24px);
 }
 
 .headline {
     font-weight: 1000;
     letter-spacing: -0.02em;
     line-height: 0.9;
-    font-size: clamp(28px, min(22vw, 18vh), 140px);
+    font-size: clamp(40px, min(14vw, 16vh), 160px);
     text-transform: inherit;
     color: var(--hero-fg);
-    max-width: 90%;
+    max-width: 20ch;
 }
 
 .subhead {
-    font-size: clamp(18px, 6vw, 28px);
+    font-size: clamp(18px, 4vw, 32px);
     opacity: 0.9;
     color: var(--hero-fg);
     font-weight: 500;
-    max-width: 90%;
+    line-height: 1.3;
+    max-width: 28ch;
     text-align: center;
 }
 
@@ -238,17 +236,17 @@ input#city::placeholder {
 
 @media (max-width: 480px) {
     .card {
-        width: min(85vw, 85vmin);
-        padding: clamp(12px, 5vmin, 24px);
+        width: min(92vw, 500px);
+        padding: clamp(18px, 6vmin, 36px);
     }
 
     .headline {
-        font-size: clamp(32px, 18vw, 96px);
-        max-width: 92%;
+        font-size: clamp(36px, 18vw, 112px);
+        max-width: 18ch;
     }
 
     .subhead {
-        font-size: clamp(16px, 5vw, 22px);
+        font-size: clamp(16px, 5vw, 24px);
     }
 
     .meta-row {
