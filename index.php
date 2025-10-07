@@ -1,6 +1,6 @@
 <?php
-$styleVersion = file_exists('styles.css') ? filemtime('styles.css') : time();
-$scriptVersion = file_exists('script.js') ? filemtime('script.js') : time();
+$styleVersion = file_exists("styles.css") ? filemtime("styles.css") : time();
+$scriptVersion = file_exists("script.js") ? filemtime("script.js") : time();
 ?>
 <!doctype html>
 <html lang="en">
@@ -78,7 +78,7 @@ $scriptVersion = file_exists('script.js') ? filemtime('script.js') : time();
             </section>
 
             <footer class="block block-tertiary">
-                <p class="disclaimer">Built by Adam Goehrig‑Bawany</p>
+                <p class="disclaimer">view spf 420 source @ <a href="https://github.com/bawanyadam/spf-420" target="_blank">github</a><br>made by Adam Goehrig‑Bawany</p>
             </footer>
         </main>
 

@@ -1,4 +1,4 @@
-# shouldiwearspf
+# doineedspf
 
 Tiny client‑only web app that grabs your location (with permission), fetches your local UV index from Open‑Meteo, and shouts a maximalist YES/NO whether you should wear SPF right now.
 

@@ -232,7 +232,7 @@ input#city::placeholder {
     font-size: 12px;
 }
 .disclaimer a {
-    color: var(--accent-2);
+    color: #000;
 }
 
 @media (max-width: 480px) {
