@@ -118,11 +118,20 @@
       const res = await fetch(u.toString());
       const data = await res.json();
       const place = data?.results?.[0];
-      if (!place) return `${lat.toFixed(3)}, ${lon.toFixed(3)}`;
+      if (!place)
+        return {
+          name: formatCoordinates(lat, lon),
+        };
       const parts = [place.name, place.admin1, place.country].filter(Boolean);
-      return parts.join(", ");
+      const joined = parts.join(", ");
+      return {
+        name: place.name || formatCoordinates(lat, lon),
+        label: joined || place.name || formatCoordinates(lat, lon),
+      };
     } catch (_) {
-      return `${lat.toFixed(3)}, ${lon.toFixed(3)}`;
+      return {
+        name: formatCoordinates(lat, lon),
+      };
     }
   }
 
@@ -142,17 +151,34 @@
     return {
       lat: hit.latitude,
       lon: hit.longitude,
+      name: hit.name,
       label: [hit.name, hit.admin1, hit.country].filter(Boolean).join(", "),
     };
   }
 
+  function formatCoordinates(lat, lon) {
+    if (lat == null || lon == null) return null;
+    return `Lat ${lat.toFixed(3)}, Lon ${lon.toFixed(3)}`;
+  }
+
   function updateUI(info) {
-    const { uvNow, uvMax, location } = info;
+    const { uvNow, uvMax, locationName, coords } = info;
     els.uvNow.textContent =
       uvNow != null ? clamp(uvNow, 0, 20).toFixed(1) : "—";
     els.uvMax.textContent =
       uvMax != null ? clamp(uvMax, 0, 20).toFixed(1) : "—";
-    els.location.textContent = location || "—";
+    els.location.textContent = locationName || "—";
+    const coordLabel = coords ? formatCoordinates(coords.lat, coords.lon) : null;
+    if (coordLabel) {
+      els.location.setAttribute("title", coordLabel);
+      const ariaLabel = locationName
+        ? `${locationName} (${coordLabel})`
+        : coordLabel;
+      els.location.setAttribute("aria-label", ariaLabel);
+    } else {
+      els.location.removeAttribute("title");
+      els.location.removeAttribute("aria-label");
+    }
 
     const rec = uvRecommendation(uvNow);
     setState(rec.state);
@@ -168,16 +194,28 @@
     );
   }
 
-  async function handleLocation(lat, lon, labelOverride) {
+  async function handleLocation(lat, lon, locationOverride) {
     try {
       setHeadline("Crunching photons…", "Checking local UV right now.");
-      const [{ uvNow, uvMax }, label] = await Promise.all([
+      const [{ uvNow, uvMax }, locationInfo] = await Promise.all([
         fetchUV(lat, lon),
-        labelOverride
-          ? Promise.resolve(labelOverride)
+        locationOverride
+          ? Promise.resolve(locationOverride)
           : reverseGeocode(lat, lon),
       ]);
-      updateUI({ uvNow, uvMax, location: label });
+      const locationName =
+        typeof locationInfo === "string"
+          ? locationInfo
+          :
+            locationInfo?.name ||
+            locationInfo?.label ||
+            formatCoordinates(lat, lon);
+      updateUI({
+        uvNow,
+        uvMax,
+        locationName,
+        coords: { lat, lon },
+      });
     } catch (err) {
       console.error(err);
       setHeadline("Hmm…", "UV lookup failed. Try again or use city search.");
@@ -215,7 +253,7 @@
     setHeadline("Finding it…", "Geocoding your city.");
     try {
       const g = await geocodeByName(name);
-      await handleLocation(g.lat, g.lon, g.label);
+      await handleLocation(g.lat, g.lon, { name: g.name, label: g.label });
     } catch (err) {
       console.error(err);
       setHeadline("No luck.", "Try a more specific city name.");
