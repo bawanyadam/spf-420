@@ -17,6 +17,23 @@
 
   const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 
+  const stripParenthetical = (value) => {
+    if (typeof value !== "string") return value;
+    return value.replace(/\s*\([^)]*\)\s*$/, "").trim();
+  };
+
+  const friendlyCountryName = (value) => {
+    const stripped = stripParenthetical(value);
+    if (!stripped) return stripped;
+    const normalized = stripped.toLowerCase();
+    if (normalized === "united states of america") return "USA";
+    if (normalized === "united kingdom of great britain and northern ireland")
+      return "UK";
+    if (normalized === "australia") return "Australia";
+    if (normalized === "canada") return "Canada";
+    return stripped;
+  };
+
   function setState(state) {
     els.app.classList.remove(
       "is-loading",
@@ -128,8 +145,12 @@
             place.city || place.name || place.admin2 || place.admin1 || null;
           const secondary =
             place.admin1 && place.admin1 !== primary ? place.admin1 : null;
-          const country = place.country || place.country_code || null;
-          const parts = [primary, secondary, country].filter(Boolean);
+          const countryCode = (place.country_code || "").toUpperCase();
+          const includeCountry = countryCode ? countryCode !== "US" : true;
+          const countryName = includeCountry
+            ? friendlyCountryName(place.country || place.country_code)
+            : null;
+          const parts = [primary, secondary, countryName].filter(Boolean);
           const joined = parts.join(", ");
           if (primary || joined) {
             return {
@@ -166,11 +187,13 @@
           data.principalSubdivision && data.principalSubdivision !== primary
             ? data.principalSubdivision
             : null;
-        const country =
-          data.countryName && data.countryName !== primary
-            ? data.countryName
+        const countryCode = (data.countryCode || "").toUpperCase();
+        const includeCountry = countryCode ? countryCode !== "US" : true;
+        const countryName =
+          includeCountry && data.countryName !== primary
+            ? friendlyCountryName(data.countryName)
             : null;
-        const parts = [primary, secondary, country].filter(Boolean);
+        const parts = [primary, secondary, countryName].filter(Boolean);
         const joined = parts.join(", ");
         if (primary || joined) {
           return {

@@ -123,10 +123,12 @@ body {
 }
 
 .subhead {
-    font-size: clamp(25px, 25vw, 25px);
+    font-size: clamp(18px, 6vw, 28px);
     opacity: 0.9;
     color: var(--hero-fg);
     font-weight: 500;
+    max-width: 90%;
+    text-align: center;
 }
 
 .block-secondary {
@@ -163,6 +165,9 @@ body {
     background: transparent;
     color: #000;
     padding: 4px 8px;
+    text-align: right;
+    word-break: break-word;
+    white-space: normal;
 }
 
 .actions {
@@ -229,6 +234,35 @@ input#city::placeholder {
 }
 .disclaimer a {
     color: var(--accent-2);
+}
+
+@media (max-width: 480px) {
+    .card {
+        width: min(85vw, 85vmin);
+        padding: clamp(12px, 5vmin, 24px);
+    }
+
+    .headline {
+        font-size: clamp(32px, 18vw, 96px);
+        max-width: 92%;
+    }
+
+    .subhead {
+        font-size: clamp(16px, 5vw, 22px);
+    }
+
+    .meta-row {
+        font-size: 0.95rem;
+        align-items: flex-start;
+    }
+
+    .meta-row .label {
+        padding: 2px 4px;
+    }
+
+    .meta-row .value {
+        padding: 2px 4px;
+    }
 }
 
 /* State-driven color pops */
