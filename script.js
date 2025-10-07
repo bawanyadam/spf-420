@@ -34,6 +34,73 @@
     return stripped;
   };
 
+  const US_STATE_BY_ABBR = {
+    AL: "Alabama",
+    AK: "Alaska",
+    AZ: "Arizona",
+    AR: "Arkansas",
+    CA: "California",
+    CO: "Colorado",
+    CT: "Connecticut",
+    DE: "Delaware",
+    FL: "Florida",
+    GA: "Georgia",
+    HI: "Hawaii",
+    ID: "Idaho",
+    IL: "Illinois",
+    IN: "Indiana",
+    IA: "Iowa",
+    KS: "Kansas",
+    KY: "Kentucky",
+    LA: "Louisiana",
+    ME: "Maine",
+    MD: "Maryland",
+    MA: "Massachusetts",
+    MI: "Michigan",
+    MN: "Minnesota",
+    MS: "Mississippi",
+    MO: "Missouri",
+    MT: "Montana",
+    NE: "Nebraska",
+    NV: "Nevada",
+    NH: "New Hampshire",
+    NJ: "New Jersey",
+    NM: "New Mexico",
+    NY: "New York",
+    NC: "North Carolina",
+    ND: "North Dakota",
+    OH: "Ohio",
+    OK: "Oklahoma",
+    OR: "Oregon",
+    PA: "Pennsylvania",
+    RI: "Rhode Island",
+    SC: "South Carolina",
+    SD: "South Dakota",
+    TN: "Tennessee",
+    TX: "Texas",
+    UT: "Utah",
+    VT: "Vermont",
+    VA: "Virginia",
+    WA: "Washington",
+    WV: "West Virginia",
+    WI: "Wisconsin",
+    WY: "Wyoming",
+    DC: "District of Columbia",
+    PR: "Puerto Rico",
+    GU: "Guam",
+    VI: "Virgin Islands",
+    MP: "Northern Mariana Islands",
+    AS: "American Samoa",
+  };
+
+  const US_STATE_ABBR_BY_NAME = Object.entries(US_STATE_BY_ABBR).reduce(
+    (acc, [abbr, full]) => {
+      acc[full.toLowerCase()] = abbr;
+      return acc;
+    },
+    {},
+  );
+
   function setState(state) {
     els.app.classList.remove(
       "is-loading",
@@ -223,19 +290,143 @@
     };
   }
 
+  function parseManualLocationInput(raw) {
+    const trimmed = (raw || "").trim();
+    if (!trimmed) return null;
+    const normalized = trimmed.replace(/\s+/g, " ");
+    const parts = normalized.split(",").map((p) => p.trim()).filter(Boolean);
+    if (!parts.length) return null;
+    const city = parts[0];
+    if (!city) return null;
+    const remainder = parts.slice(1);
+    const filterSet = new Set();
+    remainder.forEach((segment) => {
+      if (!segment) return;
+      const lowerFull = segment.toLowerCase();
+      if (lowerFull) filterSet.add(lowerFull);
+      segment
+        .split(/\s+/)
+        .map((token) => token.toLowerCase())
+        .forEach((token) => {
+          if (token) filterSet.add(token);
+        });
+    });
+    let stateAbbr = null;
+    if (remainder.length) {
+      const stateSegment = remainder[0].replace(/\./g, "").trim();
+      if (stateSegment) {
+        const upper = stateSegment.toUpperCase();
+        if (US_STATE_BY_ABBR[upper]) {
+          stateAbbr = upper;
+        } else {
+          const lowerState = stateSegment.toLowerCase();
+          const lookup = US_STATE_ABBR_BY_NAME[lowerState];
+          if (lookup) stateAbbr = lookup;
+        }
+      }
+    }
+    if (stateAbbr) {
+      filterSet.add(stateAbbr.toLowerCase());
+      const full = US_STATE_BY_ABBR[stateAbbr];
+      if (full) filterSet.add(full.toLowerCase());
+    }
+    const likelyUS =
+      !!stateAbbr ||
+      remainder.some((part) =>
+        /\busa\b|\bunited states\b|\bu\.s\.a\b|\bamerica\b/i.test(part),
+      );
+    return {
+      city,
+      filters: Array.from(filterSet),
+      stateAbbr,
+      likelyUS,
+    };
+  }
+
+  function scoreGeocodeCandidate(hit, filters, stateAbbr) {
+    if (!hit) return -Infinity;
+    const tokens = new Set();
+    const addTokens = (value) => {
+      if (!value) return;
+      const lower = value.toLowerCase();
+      if (lower) tokens.add(lower);
+      lower
+        .split(/\s+/)
+        .filter(Boolean)
+        .forEach((token) => tokens.add(token));
+    };
+    addTokens(hit.name);
+    addTokens(hit.admin1);
+    addTokens(hit.admin2);
+    addTokens(hit.admin3);
+    addTokens(hit.country);
+    addTokens(hit.country_code);
+    const admin1Lower = (hit.admin1 || "").toLowerCase();
+    const adminAbbr = US_STATE_ABBR_BY_NAME[admin1Lower] || null;
+    if (adminAbbr) tokens.add(adminAbbr.toLowerCase());
+    const countryCode = (hit.country_code || "").toUpperCase();
+    if (countryCode === "US") {
+      tokens.add("usa");
+      tokens.add("us");
+      tokens.add("america");
+      tokens.add("united states");
+      tokens.add("united states of america");
+    }
+    const tokenList = Array.from(tokens);
+    let score = 0;
+    filters.forEach((filter) => {
+      if (!filter) return;
+      if (tokens.has(filter)) {
+        score += 3;
+      } else if (tokenList.some((token) => token.includes(filter))) {
+        score += 1;
+      }
+    });
+    if (stateAbbr && adminAbbr) {
+      if (adminAbbr.toLowerCase() === stateAbbr.toLowerCase()) {
+        score += 5;
+      }
+    }
+    return score;
+  }
+
   async function geocodeByName(name) {
-    const u = new URL("https://geocoding-api.open-meteo.com/v1/search");
-    u.search = new URLSearchParams({
-      name,
-      count: "1",
+    const trimmed = (name || "").trim();
+    if (!trimmed) throw new Error("No matches found");
+    const parsed = parseManualLocationInput(trimmed);
+    const queryName = parsed?.city || trimmed;
+    const params = new URLSearchParams({
+      name: queryName,
+      count: parsed?.filters?.length ? "5" : "1",
       language: "en",
       format: "json",
-    }).toString();
+    });
+    if (parsed?.likelyUS) {
+      params.set("country", "United States");
+    }
+    const u = new URL("https://geocoding-api.open-meteo.com/v1/search");
+    u.search = params.toString();
     const res = await fetch(u.toString());
     if (!res.ok) throw new Error(`Geocode error ${res.status}`);
     const data = await res.json();
-    const hit = data?.results?.[0];
-    if (!hit) throw new Error("No matches found");
+    const results = data?.results || [];
+    if (!results.length) throw new Error("No matches found");
+    let hit = results[0];
+    if (parsed?.filters?.length) {
+      const scored = results
+        .map((candidate) => ({
+          candidate,
+          score: scoreGeocodeCandidate(
+            candidate,
+            parsed.filters,
+            parsed.stateAbbr,
+          ),
+        }))
+        .sort((a, b) => b.score - a.score);
+      if (scored.length && scored[0].score > 0) {
+        hit = scored[0].candidate;
+      }
+    }
     return {
       lat: hit.latitude,
       lon: hit.longitude,
