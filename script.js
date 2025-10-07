@@ -59,19 +59,19 @@
     if (uvNow >= 3)
       return {
         state: "state-yes",
-        title: "YES",
-        sub: "UV is 3 or higher — SPF up.",
+        title: "yes",
+        sub: "UV is 3 or higher\nSPF it",
       };
     if (uvNow >= 1)
       return {
         state: "state-maybe",
-        title: "tbh no\nbut",
-        sub: "UV is low, but sun care never hurts.",
+        title: "tbh prob",
+        sub: "UV is low but why risk it",
       };
     return {
       state: "state-no",
-      title: "technically no",
-      sub: "UV is minimal at the moment.",
+      title: "no",
+      sub: "UV is minimal at the moment",
     };
   }
 
@@ -81,6 +81,16 @@
     d.setMinutes(0, 0, 0);
     const pad = (n) => String(n).padStart(2, "0");
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:00`;
+  }
+
+  function currentHourISOStringForOffset(offsetSeconds) {
+    // Builds an ISO hour string using the target location timezone offset from UTC.
+    const offset = Number(offsetSeconds);
+    if (!Number.isFinite(offset)) return toLocalHourISOString(new Date());
+    const target = new Date(Date.now() + offset * 1000);
+    target.setUTCMinutes(0, 0, 0);
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${target.getUTCFullYear()}-${pad(target.getUTCMonth() + 1)}-${pad(target.getUTCDate())}T${pad(target.getUTCHours())}:00`;
   }
 
   async function fetchUV(lat, lon) {
@@ -103,9 +113,10 @@
     const times = data?.hourly?.time || [];
     const uv = data?.hourly?.uv_index || [];
     const dailyMax = data?.daily?.uv_index_max?.[0] ?? null;
+    const offsetSeconds = data?.utc_offset_seconds;
 
     // Find UV for the current local hour string
-    const currentHour = toLocalHourISOString(new Date());
+    const currentHour = currentHourISOStringForOffset(offsetSeconds);
     let idx = times.indexOf(currentHour);
     if (idx === -1) {
       // fallback to nearest upcoming hour within 2 slots
