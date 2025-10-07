@@ -1,3 +1,7 @@
+<?php
+$styleVersion = file_exists('styles.css') ? filemtime('styles.css') : time();
+$scriptVersion = file_exists('script.js') ? filemtime('script.js') : time();
+?>
 <!doctype html>
 <html lang="en">
     <head>
@@ -19,7 +23,7 @@
             href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="styles.css" />
+        <link rel="stylesheet" href="styles.css?v=<?= $styleVersion ?>" />
     </head>
     <body>
         <main id="app" class="app is-loading">
@@ -78,6 +82,6 @@
             </footer>
         </main>
 
-        <script src="script.js" defer></script>
+        <script src="script.js?v=<?= $scriptVersion ?>" defer></script>
     </body>
 </html>

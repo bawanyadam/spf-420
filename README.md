@@ -6,7 +6,7 @@ Built by Adam Goehrig‑Bawany.
 
 ## Run
 
-- Open `index.html` in any modern browser.
+- Serve the project through PHP (e.g. `php -S localhost:8000`) and visit `index.php` in a modern browser.
 - If prompted, allow location access. If you prefer not to, enter a city name and press "Check UV".
 
 ## How it works
@@ -17,7 +17,7 @@ Built by Adam Goehrig‑Bawany.
 
 ## Tech
 
-- Static HTML/CSS/JS — no build tools.
+- Static HTML/CSS/JS with a tiny PHP shim for cache-busting.
 - Bold color blocks with dynamic state‑based gradients.
 
 ## Notes
