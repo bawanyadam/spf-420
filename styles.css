@@ -107,7 +107,7 @@ body {
     padding: clamp(16px, 6vmin, 36px);
     background: var(--hero-bg);
     color: var(--hero-fg);
-    border: 10px solid #000;
+    border: 8px solid #000;
     border-radius: 50%;
     box-shadow: none;
 }
@@ -122,9 +122,10 @@ body {
 }
 
 .subhead {
-    font-size: clamp(35px, 25vw, 35px);
+    font-size: clamp(25px, 25vw, 25px);
     opacity: 0.9;
     color: var(--hero-fg);
+    font-weight: 500;
 }
 
 .block-secondary {

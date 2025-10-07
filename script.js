@@ -48,7 +48,7 @@
     if (uvNow >= 1)
       return {
         state: "state-maybe",
-        title: "probably\nnot",
+        title: "tbh no\nbut",
         sub: "UV is low, but sun care never hurts.",
       };
     return {
@@ -125,17 +125,10 @@
         const place = data?.results?.[0];
         if (place) {
           const primary =
-            place.city ||
-            place.name ||
-            place.admin2 ||
-            place.admin1 ||
-            null;
+            place.city || place.name || place.admin2 || place.admin1 || null;
           const secondary =
             place.admin1 && place.admin1 !== primary ? place.admin1 : null;
-          const country =
-            place.country ||
-            place.country_code ||
-            null;
+          const country = place.country || place.country_code || null;
           const parts = [primary, secondary, country].filter(Boolean);
           const joined = parts.join(", ");
           if (primary || joined) {
@@ -170,12 +163,13 @@
           data.countryName ||
           null;
         const secondary =
-          data.principalSubdivision &&
-          data.principalSubdivision !== primary
+          data.principalSubdivision && data.principalSubdivision !== primary
             ? data.principalSubdivision
             : null;
         const country =
-          data.countryName && data.countryName !== primary ? data.countryName : null;
+          data.countryName && data.countryName !== primary
+            ? data.countryName
+            : null;
         const parts = [primary, secondary, country].filter(Boolean);
         const joined = parts.join(", ");
         if (primary || joined) {
@@ -228,7 +222,9 @@
     els.uvMax.textContent =
       uvMax != null ? clamp(uvMax, 0, 20).toFixed(1) : "—";
     els.location.textContent = locationLabel || "—";
-    const coordLabel = coords ? formatCoordinates(coords.lat, coords.lon) : null;
+    const coordLabel = coords
+      ? formatCoordinates(coords.lat, coords.lon)
+      : null;
     if (coordLabel) {
       els.location.setAttribute("title", coordLabel);
       const ariaLabel =
@@ -257,7 +253,7 @@
 
   async function handleLocation(lat, lon, locationOverride) {
     try {
-      setHeadline("Crunching photons…", "Checking local UV right now.");
+      setHeadline("checking uv", "chill lol");
       const [{ uvNow, uvMax }, locationInfo] = await Promise.all([
         fetchUV(lat, lon),
         locationOverride
@@ -270,9 +266,7 @@
           : locationInfo || {};
       const fallbackLabel = formatCoordinates(lat, lon);
       const locationLabel =
-        locationDetails.label ||
-        locationDetails.name ||
-        fallbackLabel;
+        locationDetails.label || locationDetails.name || fallbackLabel;
       updateUI({
         uvNow,
         uvMax,
