@@ -48,12 +48,12 @@
     if (uvNow >= 1)
       return {
         state: "state-maybe",
-        title: "MAYBE",
+        title: "PROBABLY",
         sub: "UV is low, but sun care never hurts.",
       };
     return {
       state: "state-no",
-      title: "PROBABLY NOT",
+      title: "technically no",
       sub: "UV is minimal at the moment.",
     };
   }
@@ -107,32 +107,92 @@
   }
 
   async function reverseGeocode(lat, lon) {
+    const fallback = formatCoordinates(lat, lon);
+
+    // Attempt Open-Meteo reverse geocoding first
     try {
       const u = new URL("https://geocoding-api.open-meteo.com/v1/reverse");
       u.search = new URLSearchParams({
         latitude: String(lat),
         longitude: String(lon),
+        count: "1",
         language: "en",
         format: "json",
       }).toString();
       const res = await fetch(u.toString());
-      const data = await res.json();
-      const place = data?.results?.[0];
-      if (!place)
-        return {
-          name: formatCoordinates(lat, lon),
-        };
-      const parts = [place.name, place.admin1, place.country].filter(Boolean);
-      const joined = parts.join(", ");
-      return {
-        name: place.name || formatCoordinates(lat, lon),
-        label: joined || place.name || formatCoordinates(lat, lon),
-      };
+      if (res.ok) {
+        const data = await res.json();
+        const place = data?.results?.[0];
+        if (place) {
+          const primary =
+            place.city ||
+            place.name ||
+            place.admin2 ||
+            place.admin1 ||
+            null;
+          const secondary =
+            place.admin1 && place.admin1 !== primary ? place.admin1 : null;
+          const country =
+            place.country ||
+            place.country_code ||
+            null;
+          const parts = [primary, secondary, country].filter(Boolean);
+          const joined = parts.join(", ");
+          if (primary || joined) {
+            return {
+              name: primary || joined,
+              label: joined || primary || fallback,
+            };
+          }
+        }
+      }
     } catch (_) {
-      return {
-        name: formatCoordinates(lat, lon),
-      };
+      // swallow and fall through to fallback geocoder
     }
+
+    // Fallback to BigDataCloud reverse geocoding (no key, permissive CORS)
+    try {
+      const fallbackUrl = new URL(
+        "https://api.bigdatacloud.net/data/reverse-geocode-client",
+      );
+      fallbackUrl.search = new URLSearchParams({
+        latitude: String(lat),
+        longitude: String(lon),
+        localityLanguage: "en",
+      }).toString();
+      const res = await fetch(fallbackUrl.toString());
+      if (res.ok) {
+        const data = await res.json();
+        const primary =
+          data.city ||
+          data.locality ||
+          data.principalSubdivision ||
+          data.countryName ||
+          null;
+        const secondary =
+          data.principalSubdivision &&
+          data.principalSubdivision !== primary
+            ? data.principalSubdivision
+            : null;
+        const country =
+          data.countryName && data.countryName !== primary ? data.countryName : null;
+        const parts = [primary, secondary, country].filter(Boolean);
+        const joined = parts.join(", ");
+        if (primary || joined) {
+          return {
+            name: primary || joined,
+            label: joined || primary || fallback,
+          };
+        }
+      }
+    } catch (_) {
+      // ignore and fall back to lat/lon
+    }
+
+    return {
+      name: fallback,
+      label: fallback,
+    };
   }
 
   async function geocodeByName(name) {
@@ -162,18 +222,19 @@
   }
 
   function updateUI(info) {
-    const { uvNow, uvMax, locationName, coords } = info;
+    const { uvNow, uvMax, locationLabel, coords } = info;
     els.uvNow.textContent =
       uvNow != null ? clamp(uvNow, 0, 20).toFixed(1) : "—";
     els.uvMax.textContent =
       uvMax != null ? clamp(uvMax, 0, 20).toFixed(1) : "—";
-    els.location.textContent = locationName || "—";
+    els.location.textContent = locationLabel || "—";
     const coordLabel = coords ? formatCoordinates(coords.lat, coords.lon) : null;
     if (coordLabel) {
       els.location.setAttribute("title", coordLabel);
-      const ariaLabel = locationName
-        ? `${locationName} (${coordLabel})`
-        : coordLabel;
+      const ariaLabel =
+        locationLabel && locationLabel !== coordLabel
+          ? `${locationLabel} (${coordLabel})`
+          : coordLabel;
       els.location.setAttribute("aria-label", ariaLabel);
     } else {
       els.location.removeAttribute("title");
@@ -203,17 +264,19 @@
           ? Promise.resolve(locationOverride)
           : reverseGeocode(lat, lon),
       ]);
-      const locationName =
+      const locationDetails =
         typeof locationInfo === "string"
-          ? locationInfo
-          :
-            locationInfo?.name ||
-            locationInfo?.label ||
-            formatCoordinates(lat, lon);
+          ? { name: locationInfo, label: locationInfo }
+          : locationInfo || {};
+      const fallbackLabel = formatCoordinates(lat, lon);
+      const locationLabel =
+        locationDetails.label ||
+        locationDetails.name ||
+        fallbackLabel;
       updateUI({
         uvNow,
         uvMax,
-        locationName,
+        locationLabel,
         coords: { lat, lon },
       });
     } catch (err) {
