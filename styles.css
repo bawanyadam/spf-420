@@ -71,7 +71,7 @@ body {
     justify-items: center;
     text-align: left;
     gap: 16px;
-    min-height: 50vh;
+    min-height: 25vh;
     background: transparent;
     color: var(--ink);
     overflow: hidden;
